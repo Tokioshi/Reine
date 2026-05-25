@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "reine",
+  "main": "src/index.js",
+  "compatibility_date": "2026-05-25",
+  "workers_dev": true,
+  "triggers": {
+    "crons": ["*/10 * * * *"]
+  },
+  "vars": {
+    "DISCORD_API_BASE": "https://discord.com/api/v10"
+  },
+  "secrets": {
+    "required": [
+      "BOT_TOKEN",
+      "APPLICATION_ID",
+      "PUBLIC_KEY",
+      "GUILD_ID",
+      "NOTIFY_CHANNEL_ID",
+      "REGISTER_SECRET"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "reine_db",
+      "database_id": "01e25886-f408-4e55-b10e-0c56d6316c6c"
+    }
+  ]
+}

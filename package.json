@@ -1,0 +1,20 @@
+{
+  "name": "reine",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create reine_db",
+    "db:migrate:local": "wrangler d1 migrations apply reine_db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply reine_db --remote",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
