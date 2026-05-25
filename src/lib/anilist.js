@@ -26,15 +26,15 @@ export async function anilistQuery(query, variables = {}) {
 export async function searchAnime(search) {
     const data = await anilistQuery(
         `query ($search: String) {
-      Page(perPage: 25) {
-        media(search: $search, type: ANIME, format_in: [TV, ONA]) {
-          id
-          title { romaji english }
-          status
-          seasonYear
-        }
-      }
-    }`,
+            Page(perPage: 25) {
+                media(search: $search, type: ANIME, format_in: [TV, ONA]) {
+                    id
+                    title { romaji english }
+                    status
+                    seasonYear
+                }
+            }
+        }`,
         { search },
     );
 
@@ -44,18 +44,18 @@ export async function searchAnime(search) {
 export async function getAnimeStatus(id) {
     const data = await anilistQuery(
         `query ($id: Int) {
-      Media(id: $id, type: ANIME) {
-        id
-        title { romaji english }
-        episodes
-        status
-        coverImage { large }
-        siteUrl
-        airingSchedule(notYetAired: false, perPage: 50) {
-          nodes { episode airingAt }
-        }
-      }
-    }`,
+            Media(id: $id, type: ANIME) {
+                id
+                title { romaji english }
+                episodes
+                status
+                coverImage { large }
+                siteUrl
+                airingSchedule(notYetAired: false, perPage: 50) {
+                    nodes { episode airingAt }
+                }
+            }
+        }`,
         { id },
     );
 
