@@ -77,7 +77,7 @@ async function handleRequest(request, env) {
     const url = new URL(request.url);
 
     if (url.pathname === "/" && request.method === "GET") {
-        return json({ ok: true, service: "reine-workers" });
+        return json({ ok: true, service: "reine" });
     }
 
     if (url.pathname === "/interactions") {
