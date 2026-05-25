@@ -23,12 +23,12 @@ function autocompleteResult(choices) {
     };
 }
 
-async function watchAutocomplete(interaction) {
+async function watchAutocomplete(interaction, env) {
     const focused = interaction.data.options?.find((option) => option.focused)?.value ?? "";
     if (focused.length < 2) return autocompleteResult([]);
 
     try {
-        const results = await searchAnime(focused);
+        const results = await searchAnime(env, focused);
         const choices = results.slice(0, 25).map((anime) => {
             const title = anime.title.english ?? anime.title.romaji;
             const year = anime.seasonYear ? ` (${anime.seasonYear})` : "";
@@ -60,7 +60,7 @@ async function watchExecute(interaction, env) {
     if (existing) return ephemeral(`**${existing.title}** is already on the watchlist.`);
 
     try {
-        const status = await getAnimeStatus(anilistId);
+        const status = await getAnimeStatus(env, anilistId);
 
         await addAnime(env.DB, anilistId, {
             title: status.title,

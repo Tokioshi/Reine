@@ -13,7 +13,7 @@ export async function checkNewEpisodes(env) {
 
     for (const anime of watchlist) {
         try {
-            const status = await getAnimeStatus(anime.anilistId);
+            const status = await getAnimeStatus(env, anime.anilistId);
 
             if (status.latestEpisode > anime.lastEpisode) {
                 await sendEpisodeNotification(env, {

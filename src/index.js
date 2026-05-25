@@ -80,6 +80,45 @@ async function handleRequest(request, env) {
         return json({ ok: true, service: "reine" });
     }
 
+    if (url.pathname === "/debug/anilist" && request.method === "GET") {
+        const query = `
+        query ($search: String) {
+            Page(perPage: 3) {
+                media(search: $search, type: ANIME, format_in: [TV, ONA]) {
+                    id
+                    title { romaji english }
+                    status
+                    seasonYear
+                }
+            }
+        }
+        `;
+
+        const res = await fetch("https://graphql.anilist.co", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "User-Agent": "Mozilla/5.0 ReineDiscordBot/2.0",
+                Origin: "https://anilist.co",
+                Referer: "https://anilist.co/",
+            },
+            body: JSON.stringify({
+                query,
+                variables: { search: "frieren" },
+            }),
+        });
+
+        const text = await res.text();
+
+        return new Response(text, {
+            status: res.status,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+
     if (url.pathname === "/interactions") {
         return handleInteractions(request, env);
     }
