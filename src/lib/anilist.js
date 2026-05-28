@@ -26,7 +26,7 @@ export async function searchAnime(env, search) {
         env,
         `query ($search: String) {
             Page(perPage: 25) {
-                media(search: $search, type: ANIME, format_in: [TV, ONA]) {
+                media(search: $search, type: ANIME, format_in: [TV, ONA, TV_SHORT]) {
                     id
                     title { romaji english }
                     status
