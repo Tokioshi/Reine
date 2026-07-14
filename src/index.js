@@ -1,10 +1,10 @@
-import { readAndVerifyDiscordRequest } from "./lib/verify.js";
-import { InteractionType, InteractionResponseType } from "./lib/constants.js";
-import { json, methodNotAllowed, notFound } from "./lib/http.js";
-import { COMMANDS } from "./lib/commands.js";
-import { slashCommands } from "./lib/commands-definition.js";
-import { registerGuildCommands } from "./lib/discord.js";
-import { checkNewEpisodes } from "./lib/episode-checker.js";
+import { readAndVerifyDiscordRequest } from "./utils/verify.js";
+import { InteractionType, InteractionResponseType } from "./utils/constants.js";
+import { json, methodNotAllowed, notFound } from "./utils/http.js";
+import { COMMANDS } from "./commands/commands.js";
+import { slashCommands } from "./commands/definition.js";
+import { registerGuildCommands } from "./utils/discord.js";
+import { checkNewEpisodes } from "./utils/episode-checker.js";
 
 async function handleInteractions(request, env) {
     if (request.method !== "POST") return methodNotAllowed();

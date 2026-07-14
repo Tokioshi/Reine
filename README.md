@@ -27,6 +27,8 @@ npx wrangler secret put PUBLIC_KEY
 npx wrangler secret put GUILD_ID
 npx wrangler secret put NOTIFY_CHANNEL_ID
 npx wrangler secret put REGISTER_SECRET
+npx wrangler secret put ANILIST_PROXY_TOKEN
+npx wrangler secret put ANILIST_PROXY_URL
 ```
 
 Deploy:
