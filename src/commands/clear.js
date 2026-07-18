@@ -1,5 +1,5 @@
 import { fetchRecentMessages, bulkDeleteMessages } from "../utils/discord.js";
-import { ephemeral } from "./_helpers.js";
+import { ephemeral, ephemeralEmbed } from "./_helpers.js";
 
 async function execute(interaction, env) {
     const option = interaction.data.options?.find((option) => option.name === "amount");
@@ -19,22 +19,31 @@ async function execute(interaction, env) {
         const ids = messages.slice(0, amount).map((message) => message.id);
 
         if (ids.length < 2) {
-            return ephemeral("There aren't enough recent messages to bulk delete.");
+            return ephemeralEmbed([
+                {
+                    color: 0xffff00,
+                    description: "There aren't enough recent messages to bulk delete.",
+                },
+            ]);
         }
 
         await bulkDeleteMessages(env, interaction.channel_id, ids);
 
-        if (ids.length < amount) {
-            return ephemeral(
-                `🧹 Deleted **${ids.length}** messages.\nSome messages were skipped because they were pinned or older than 14 days.`,
-            );
-        }
-
-        return ephemeral(`🧹 Deleted **${ids.length}** messages.`);
+        return ephemeralEmbed([
+            {
+                color: 0x39ff14,
+                description: `🧹 Deleted **${ids.length}** messages.`,
+            },
+        ]);
     } catch (err) {
         console.error("[clear]", err);
 
-        return ephemeral(`❌ Failed to delete messages.\n${err.message}`);
+        return ephemeralEmbed([
+            {
+                color: 0xff0000,
+                description: `❌ Failed to delete messages.\n${err.message}`,
+            },
+        ]);
     }
 }
 
