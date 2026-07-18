@@ -1,13 +1,14 @@
 const DISCORD_EPOCH = 1420070400000;
 const MAX_MESSAGE_AGE = 14 * 24 * 60 * 60 * 1000;
 
-export async function discordRequest(env, method, path, body = null) {
+export async function discordRequest(env, method, path, body = null, extraHeaders = {}) {
     const makeRequest = async () => {
         const res = await fetch(`${env.DISCORD_API_BASE}${path}`, {
             method,
             headers: {
                 Authorization: `Bot ${env.BOT_TOKEN}`,
                 "Content-Type": "application/json",
+                ...extraHeaders,
             },
             body: body ? JSON.stringify(body) : undefined,
         });
@@ -72,4 +73,18 @@ export async function bulkDeleteMessages(env, channelId, ids) {
     return discordRequest(env, "POST", `/channels/${channelId}/messages/bulk-delete`, {
         messages: ids,
     });
+}
+
+export async function banUser(env, guildId, userId, { reason, deleteMessageSeconds } = {}) {
+    const headers = reason
+        ? { "X-Audit-Log-Reason": encodeURIComponent(reason.slice(0, 512)) }
+        : {};
+
+    return discordRequest(
+        env,
+        "PUT",
+        `/guilds/${guildId}/bans/${userId}`,
+        deleteMessageSeconds ? { delete_message_seconds: deleteMessageSeconds } : {},
+        headers,
+    );
 }
