@@ -1,8 +1,7 @@
 import { readAndVerifyDiscordRequest } from "./utils/verify.js";
 import { InteractionType, InteractionResponseType } from "./utils/constants.js";
 import { json, methodNotAllowed, notFound } from "./utils/http.js";
-import { COMMANDS } from "./commands/commands.js";
-import { slashCommands } from "./commands/definition.js";
+import { COMMANDS, slashCommands } from "./commands/index.js";
 import { registerGuildCommands } from "./utils/discord.js";
 import { checkNewEpisodes } from "./utils/episode-checker.js";
 

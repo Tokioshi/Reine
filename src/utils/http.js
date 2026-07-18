@@ -8,9 +8,9 @@ export function json(data, status = 200) {
 }
 
 export function notFound() {
-    return json({ error: "Not found" }, 404);
+    return json({ error: "Couldn't find anything." }, 404);
 }
 
 export function methodNotAllowed() {
-    return json({ error: "Method not allowed" }, 405);
+    return json({ error: "What are you doing here? You won't find anything." }, 405);
 }
