@@ -1,11 +1,11 @@
 import { readAndVerifyDiscordRequest } from "./utils/verify.js";
 import { InteractionType, InteractionResponseType } from "./utils/constants.js";
 import { json, methodNotAllowed, notFound } from "./utils/http.js";
-import { COMMANDS, slashCommands } from "./commands/index.js";
+import { COMMANDS, slashCommands, MODAL_HANDLERS } from "./commands/index.js";
 import { registerGuildCommands } from "./utils/discord.js";
 import { checkNewEpisodes } from "./utils/episode-checker.js";
 
-async function handleInteractions(request, env) {
+async function handleInteractions(request, env, ctx) {
     if (request.method !== "POST") return methodNotAllowed();
 
     const verification = await readAndVerifyDiscordRequest(request, env.PUBLIC_KEY);
@@ -57,6 +57,27 @@ async function handleInteractions(request, env) {
         }
     }
 
+    if (interaction.type === InteractionType.MODAL_SUBMIT) {
+        const handler = MODAL_HANDLERS[interaction.data?.custom_id];
+        if (!handler) {
+            return json({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: { content: "Unknown modal.", flags: 64 },
+            });
+        }
+
+        ctx.waitUntil(
+            handler(interaction, env).catch((err) =>
+                console.error(`[modal:${interaction.data.custom_id}] Error:`, err.message),
+            ),
+        );
+
+        return json({
+            type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+            data: { flags: 64 },
+        });
+    }
+
     return json({ error: "Unknown interaction type" }, 400);
 }
 
@@ -72,7 +93,7 @@ async function handleRegisterCommands(request, env) {
     return json({ ok: true, commands: result });
 }
 
-async function handleRequest(request, env) {
+async function handleRequest(request, env, ctx) {
     const url = new URL(request.url);
 
     if (url.pathname === "/" && request.method === "GET") {
@@ -80,7 +101,7 @@ async function handleRequest(request, env) {
     }
 
     if (url.pathname === "/interactions") {
-        return handleInteractions(request, env);
+        return handleInteractions(request, env, ctx);
     }
 
     if (url.pathname === "/admin/register-commands") {
@@ -91,8 +112,8 @@ async function handleRequest(request, env) {
 }
 
 export default {
-    fetch(request, env) {
-        return handleRequest(request, env);
+    fetch(request, env, ctx) {
+        return handleRequest(request, env, ctx);
     },
 
     async scheduled(_event, env, ctx) {
