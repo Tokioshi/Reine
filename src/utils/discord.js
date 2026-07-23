@@ -49,6 +49,41 @@ export function registerGuildCommands(env, commands) {
     );
 }
 
+export function editOriginalResponse(env, interactionToken, payload) {
+    return discordRequest(
+        env,
+        "PATCH",
+        `/webhooks/${env.APPLICATION_ID}/${interactionToken}/messages/@original`,
+        payload,
+    );
+}
+
+export async function sendMessageWithFiles(
+    env,
+    channelId,
+    { content, files = [], messageReference } = {},
+) {
+    const payload = {};
+    if (content) payload.content = content;
+    if (messageReference) payload.message_reference = { message_id: messageReference };
+
+    const form = new FormData();
+    form.append("payload_json", JSON.stringify(payload));
+    files.forEach((file, index) => form.append(`files[${index}]`, file.blob, file.name));
+
+    const res = await fetch(`${env.DISCORD_API_BASE}/channels/${channelId}/messages`, {
+        method: "POST",
+        headers: { Authorization: `Bot ${env.BOT_TOKEN}` },
+        body: form,
+    });
+
+    if (!res.ok) {
+        throw new Error(`Discord API error ${res.status}: ${await res.text()}`);
+    }
+
+    return res.json();
+}
+
 function getMessageTimestamp(id) {
     return Number(BigInt(id) >> 22n) + DISCORD_EPOCH;
 }
