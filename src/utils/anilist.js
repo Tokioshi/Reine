@@ -1,8 +1,10 @@
+import { sendMessage } from "./discord.js";
+
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchWithRetry(url, options, maxRetries = 5) {
+async function fetchWithRetry(env, url, options, maxRetries = 5) {
     let delay = 1000;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -36,11 +38,21 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
         return res;
     }
 
+    await sendMessage(env, "1530831591507759155", {
+        embeds: [
+            {
+                title: "Anilist API Error",
+                color: 0xff0000,
+                description: `I have detect an error with the API proxy. Please check the logs.\nReferrence: Request failed after maximum retries.`,
+            },
+        ],
+    });
+
     throw new Error("AniList request failed after maximum retries.");
 }
 
 export async function anilistQuery(env, query, variables = {}) {
-    const res = await fetchWithRetry(env.ANILIST_PROXY_URL, {
+    const res = await fetchWithRetry(env, env.ANILIST_PROXY_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -57,6 +69,16 @@ export async function anilistQuery(env, query, variables = {}) {
         const text = await res.text();
 
         console.error("[anilist proxy] HTTP error", res.status, text.slice(0, 500));
+
+        await sendMessage(env, "1530831591507759155", {
+            embeds: [
+                {
+                    title: "Anilist API Error",
+                    color: 0xff0000,
+                    description: `I have detect an error with the API proxy. Please check the logs.\nReferrence: A long one. Just check the log.`,
+                },
+            ],
+        });
 
         throw new Error(`AniList proxy error: ${res.status}`);
     }
