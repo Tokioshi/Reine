@@ -1,5 +1,5 @@
-import { removeAnime, getAllAnime, getAnime } from "../db/db.js";
-import { ephemeral, autocompleteResult } from "./_helpers.js";
+import { removeAnime, getAllAnime, getAnime } from "../utils/database.js";
+import { ephemeral, autocompleteResult } from "../utils/responses.js";
 
 async function autocomplete(interaction, env) {
     const focused = (

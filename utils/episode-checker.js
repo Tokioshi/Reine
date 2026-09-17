@@ -1,4 +1,4 @@
-import { getAllAnime, updateLastEpisode } from "../db/db.js";
+import { getAllAnime, updateLastEpisode } from "./database.js";
 import { getMultipleAnimeStatus } from "./anilist.js";
 import { sendEpisodeNotification } from "./notify.js";
 

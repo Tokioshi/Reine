@@ -1,5 +1,5 @@
 import { fetchRecentMessages, bulkDeleteMessages } from "../utils/discord.js";
-import { ephemeral, ephemeralEmbed } from "./_helpers.js";
+import { ephemeral, ephemeralEmbed } from "../utils/responses.js";
 
 async function execute(interaction, env) {
     const option = interaction.data.options?.find((option) => option.name === "amount");

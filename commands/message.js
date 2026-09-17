@@ -1,6 +1,6 @@
 import { ComponentType, TextInputStyle } from "../utils/constants.js";
 import { sendMessage, sendMessageWithFiles, editOriginalResponse } from "../utils/discord.js";
-import { modal, getModalText, getModalFiles } from "./_helpers.js";
+import { modal, getModalText, getModalFiles } from "../utils/responses.js";
 
 function execute(_interaction, _env) {
     return modal("message", "Message Form", [

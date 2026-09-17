@@ -1,5 +1,5 @@
-import { getAllAnime } from "../db/db.js";
-import { ephemeral, ephemeralEmbed } from "./_helpers.js";
+import { getAllAnime } from "../utils/database.js";
+import { ephemeral, ephemeralEmbed } from "../utils/responses.js";
 
 async function execute(_interaction, env) {
     const watchlist = await getAllAnime(env.DB);

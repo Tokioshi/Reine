@@ -1,4 +1,4 @@
-import { InteractionResponseType, MessageFlags } from "../utils/constants.js";
+import { InteractionResponseType, MessageFlags } from "./constants.js";
 
 export function ephemeral(content) {
     return {

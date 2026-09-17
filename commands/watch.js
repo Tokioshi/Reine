@@ -1,6 +1,6 @@
 import { searchAnime, getAnimeStatus } from "../utils/anilist.js";
-import { addAnime, getAnime } from "../db/db.js";
-import { ephemeral, autocompleteResult } from "./_helpers.js";
+import { addAnime, getAnime } from "../utils/database.js";
+import { ephemeral, autocompleteResult } from "../utils/responses.js";
 
 async function autocomplete(interaction, env) {
     const focused = interaction.data.options?.find((option) => option.focused)?.value ?? "";
