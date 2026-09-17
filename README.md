@@ -2,6 +2,19 @@
 
 Cloudflare Workers native Discord Interactions bot. No Express, no app.listen, no persistent server, no node-cron, no local filesystem database, no process.env in Worker code.
 
+## Project structure
+
+```text
+commands/   Slash command implementations
+events/     Cloudflare Worker fetch and scheduled events
+handler/    Discord interaction dispatch and command registration
+utils/      Shared Discord, AniList, database, and response helpers
+schema/     D1 database migrations
+index.js    Cloudflare Worker entry point
+```
+
+Cloudflare Workers receive Discord interactions through HTTP rather than a persistent WebSocket connection. `events/fetch.js` routes incoming HTTP requests, while `handler/interactions.js` verifies and dispatches Discord interactions to files in `commands/`.
+
 ## Setup
 
 ```bash
@@ -51,4 +64,4 @@ curl -X POST \
   https://<your-worker>.<your-subdomain>.workers.dev/admin/register-commands
 ```
 
-Scheduled episode checks are configured in `wrangler.jsonc` with cron `*/10 * * * *` and handled by `scheduled()` in `src/index.js`.
+Scheduled episode checks are configured in `wrangler.jsonc` with cron `*/10 * * * *`. The Worker entry point forwards that event to `events/scheduled.js`.
