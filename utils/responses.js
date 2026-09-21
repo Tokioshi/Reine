@@ -52,6 +52,10 @@ export function getModalText(interaction, customId) {
     return findModalComponent(interaction.data?.components, customId)?.value ?? null;
 }
 
+export function getModalValues(interaction, customId) {
+    return findModalComponent(interaction.data?.components, customId)?.values ?? [];
+}
+
 export function getModalFiles(interaction, customId) {
     const component = findModalComponent(interaction.data?.components, customId);
     const ids = component?.values ?? [];

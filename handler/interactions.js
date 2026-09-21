@@ -1,4 +1,9 @@
-import { commandHandlers, modalHandlers } from "./commands.js";
+import {
+    commandHandlers,
+    componentHandlers,
+    findInteractionHandler,
+    modalHandlers,
+} from "./commands.js";
 import {
     InteractionResponseType,
     InteractionType,
@@ -46,8 +51,28 @@ async function handleApplicationCommand(interaction, env) {
     }
 }
 
+async function handleMessageComponent(interaction, env) {
+    const handler = findInteractionHandler(componentHandlers, interaction.data?.custom_id);
+    if (!handler) {
+        return json({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: { content: "Unknown component.", flags: MessageFlags.EPHEMERAL },
+        });
+    }
+
+    try {
+        return json(await handler(interaction, env));
+    } catch (error) {
+        console.error(`[component:${interaction.data?.custom_id}] Error:`, error.message);
+        return json({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: { content: "An error occurred.", flags: MessageFlags.EPHEMERAL },
+        });
+    }
+}
+
 function handleModal(interaction, env, ctx) {
-    const handler = modalHandlers[interaction.data?.custom_id];
+    const handler = findInteractionHandler(modalHandlers, interaction.data?.custom_id);
     if (!handler) {
         return json({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -82,6 +107,8 @@ export async function handleDiscordInteraction(request, env, ctx) {
             return handleAutocomplete(interaction, env);
         case InteractionType.APPLICATION_COMMAND:
             return handleApplicationCommand(interaction, env);
+        case InteractionType.MESSAGE_COMPONENT:
+            return handleMessageComponent(interaction, env);
         case InteractionType.MODAL_SUBMIT:
             return handleModal(interaction, env, ctx);
         default:

@@ -40,6 +40,46 @@ export function sendMessage(env, channelId, payload) {
     return discordRequest(env, "POST", `/channels/${channelId}/messages`, payload);
 }
 
+export function editMessage(env, channelId, messageId, payload) {
+    return discordRequest(env, "PATCH", `/channels/${channelId}/messages/${messageId}`, payload);
+}
+
+export function getMessage(env, channelId, messageId) {
+    return discordRequest(env, "GET", `/channels/${channelId}/messages/${messageId}`);
+}
+
+export function deleteMessage(env, channelId, messageId) {
+    return discordRequest(env, "DELETE", `/channels/${channelId}/messages/${messageId}`);
+}
+
+export function getChannel(env, channelId) {
+    return discordRequest(env, "GET", `/channels/${channelId}`);
+}
+
+export function createPrivateThread(env, parentChannelId, payload) {
+    return discordRequest(env, "POST", `/channels/${parentChannelId}/threads`, {
+        type: 12,
+        invitable: false,
+        ...payload,
+    });
+}
+
+export function addThreadMember(env, threadId, userId) {
+    return discordRequest(env, "PUT", `/channels/${threadId}/thread-members/${userId}`);
+}
+
+export function joinThread(env, threadId) {
+    return discordRequest(env, "PUT", `/channels/${threadId}/thread-members/@me`);
+}
+
+export function removeThreadMember(env, threadId, userId) {
+    return discordRequest(env, "DELETE", `/channels/${threadId}/thread-members/${userId}`);
+}
+
+export function modifyThread(env, threadId, payload) {
+    return discordRequest(env, "PATCH", `/channels/${threadId}`, payload);
+}
+
 export function registerGuildCommands(env, commands) {
     return discordRequest(
         env,

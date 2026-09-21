@@ -9,6 +9,7 @@
     },
     "vars": {
         "DISCORD_API_BASE": "https://discord.com/api/v10",
+        "TICKET_ROLE_IDS": "1254702078555586592,1416280122767708201,1101865823188025354",
     },
     "secrets": {
         "required": [
@@ -17,6 +18,7 @@
             "PUBLIC_KEY",
             "GUILD_ID",
             "NOTIFY_CHANNEL_ID",
+            "TICKET_LOG_CHANNEL_ID",
             "REGISTER_SECRET",
             "ANILIST_PROXY_TOKEN",
             "ANILIST_PROXY_URL",
@@ -27,6 +29,7 @@
             "binding": "DB",
             "database_name": "reine_db",
             "database_id": "01e25886-f408-4e55-b10e-0c56d6316c6c",
+            "migrations_dir": "schema",
         },
     ],
     "observability": {
