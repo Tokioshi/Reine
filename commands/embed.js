@@ -1,24 +1,15 @@
-import {
-    ButtonStyle,
-    ComponentType,
-    PermissionFlags,
-    TextInputStyle,
-} from "../utils/constants.js";
-import {
-    editMessage,
-    editOriginalResponse,
-    getMessage,
-    sendMessage,
-} from "../utils/discord.js";
+import config from "../config.js";
+import { ButtonStyle, ComponentType, PermissionFlags, TextInputStyle } from "../utils/constants.js";
+import { editMessage, editOriginalResponse, getMessage, sendMessage } from "../utils/discord.js";
 import { ephemeralEmbed, getModalText, modal } from "../utils/responses.js";
 
 const CREATE_MODAL_ID = "embed:create";
 const EDIT_LOOKUP_MODAL_ID = "embed:lookup";
 const EDIT_BUTTON_PREFIX = "embed:open-edit:";
 const EDIT_MODAL_PREFIX = "embed:update:";
-const SUCCESS_COLOR = 0x57f287;
-const ERROR_COLOR = 0xed4245;
-const INFO_COLOR = 0x5865f2;
+const SUCCESS_COLOR = config.color.success;
+const ERROR_COLOR = config.color.error;
+const INFO_COLOR = config.color.information;
 
 function getUserId(interaction) {
     return interaction.member?.user?.id ?? interaction.user?.id ?? null;
@@ -57,22 +48,22 @@ function modalField(label, customId, style, options = {}) {
 
 function embedForm(customId, title, values = {}) {
     return modal(customId, title, [
-        modalField("Judul", "title", TextInputStyle.SHORT, {
+        modalField("Title", "title", TextInputStyle.SHORT, {
             min_length: 1,
             max_length: 256,
-            placeholder: "Masukkan judul embed",
+            placeholder: "Enter embed title",
             ...(values.title ? { value: values.title } : {}),
         }),
-        modalField("Warna (Hex)", "color", TextInputStyle.SHORT, {
+        modalField("Color (Hex)", "color", TextInputStyle.SHORT, {
             min_length: 3,
             max_length: 9,
-            placeholder: "Contoh: #5865F2",
+            placeholder: "Example: #5865F2",
             ...(values.color ? { value: values.color } : {}),
         }),
-        modalField("Deskripsi", "description", TextInputStyle.PARAGRAPH, {
+        modalField("Description", "description", TextInputStyle.PARAGRAPH, {
             min_length: 1,
             max_length: 4000,
-            placeholder: "Masukkan deskripsi embed",
+            placeholder: "Enter embed description",
             ...(values.description ? { value: values.description } : {}),
         }),
     ]);
@@ -101,12 +92,12 @@ function readEmbedInput(interaction) {
     const color = parseColor(getModalText(interaction, "color") ?? "");
 
     if (!title || !description) {
-        return { error: "Judul dan deskripsi tidak boleh kosong." };
+        return { error: "Title and description cannot be empty." };
     }
 
     if (color === null) {
         return {
-            error: "Warna tidak valid. Gunakan format Hex seperti `#5865F2` atau `5865F2`.",
+            error: "Invalid color. Use a Hex format like `#5865F2` or `5865F2`.",
         };
     }
 
@@ -126,8 +117,9 @@ function parseScopedCustomId(customId, prefix) {
 function validateAccess(interaction) {
     if (!interaction.guild_id || !isAdministrator(interaction)) {
         return ephemeralStatus(
-            "Akses Ditolak",
-            "Hanya Administrator server yang dapat menggunakan fitur ini.",
+            "Access Denied",
+            "Only server administrators can use this feature.",
+            ERROR_COLOR,
         );
     }
 
@@ -138,23 +130,23 @@ async function fetchEditableMessage(interaction, env, messageId) {
     const message = await getMessage(env, interaction.channel_id, messageId);
 
     if (message.author?.id !== env.APPLICATION_ID || message.author?.bot !== true) {
-        return { error: "Pesan tersebut bukan pesan yang dikirim oleh bot ini." };
+        return { error: "The message is not sent by this bot." };
     }
 
     if (!Array.isArray(message.embeds) || message.embeds.length === 0) {
-        return { error: "Pesan tersebut tidak memiliki embed yang dapat diedit." };
+        return { error: "The message does not have any embeds that can be edited." };
     }
 
     const embed = message.embeds[0];
     if (!embed.title || !embed.description) {
         return {
-            error: "Embed tersebut tidak memiliki judul dan deskripsi lengkap sehingga tidak dapat diedit melalui formulir ini.",
+            error: "The embed does not have a complete title and description, so it cannot be edited through this form.",
         };
     }
 
     if (embed.title.length > 256 || embed.description.length > 4000) {
         return {
-            error: "Judul atau deskripsi embed melebihi batas yang dapat dimuat oleh formulir edit.",
+            error: "The embed title or description exceeds the limit that can be loaded by the edit form.",
         };
     }
 
@@ -167,19 +159,19 @@ function execute(interaction) {
 
     const action = interaction.data.options?.find((option) => option.name === "opsi")?.value;
 
-    if (action === "create") return embedForm(CREATE_MODAL_ID, "Buat Embed");
+    if (action === "create") return embedForm(CREATE_MODAL_ID, "Create Embed");
 
     if (action === "edit") {
-        return modal(EDIT_LOOKUP_MODAL_ID, "Cari Embed", [
-            modalField("ID Pesan", "message_id", TextInputStyle.SHORT, {
+        return modal(EDIT_LOOKUP_MODAL_ID, "Lookup Embed", [
+            modalField("Message ID", "message_id", TextInputStyle.SHORT, {
                 min_length: 17,
                 max_length: 20,
-                placeholder: "Masukkan ID pesan dari bot",
+                placeholder: "Enter message ID from the bot",
             }),
         ]);
     }
 
-    return ephemeralStatus("Opsi Tidak Valid", "Silakan pilih opsi Buat atau Edit.");
+    return ephemeralStatus("Invalid Option", "Please choose either Create or Edit.", ERROR_COLOR);
 }
 
 async function handleCreateSubmit(interaction, env) {
@@ -191,7 +183,7 @@ async function handleCreateSubmit(interaction, env) {
     const input = readEmbedInput(interaction);
     if (input.error) {
         return editOriginalResponse(env, interaction.token, {
-            embeds: [statusEmbed("Embed Tidak Valid", input.error, ERROR_COLOR)],
+            embeds: [statusEmbed("Invalid Embed", input.error, ERROR_COLOR)],
         });
     }
 
@@ -204,8 +196,8 @@ async function handleCreateSubmit(interaction, env) {
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
-                    "Embed Berhasil Dibuat",
-                    `Embed telah dikirim ke channel ini. ID pesan: \`${message.id}\``,
+                    "Embed Created Successfully",
+                    `The embed has been sent to this channel. Message ID: \`${message.id}\``,
                     SUCCESS_COLOR,
                 ),
             ],
@@ -215,8 +207,8 @@ async function handleCreateSubmit(interaction, env) {
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
-                    "Gagal Membuat Embed",
-                    "Bot tidak dapat mengirim embed. Pastikan bot memiliki izin Kirim Pesan dan Sematkan Tautan, lalu coba lagi.",
+                    "Failed to Create Embed",
+                    "Bot cannot send embed. Make sure the bot has permission to Send Messages and Embed Links, then try again.",
                     ERROR_COLOR,
                 ),
             ],
@@ -235,8 +227,8 @@ async function handleLookupSubmit(interaction, env) {
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
-                    "ID Pesan Tidak Valid",
-                    "Masukkan ID pesan Discord yang valid, terdiri dari 17–20 angka.",
+                    "Invalid Message ID",
+                    "Please enter a valid Discord message ID, which consists of 17–20 digits.",
                     ERROR_COLOR,
                 ),
             ],
@@ -247,7 +239,7 @@ async function handleLookupSubmit(interaction, env) {
         const result = await fetchEditableMessage(interaction, env, messageId);
         if (result.error) {
             return editOriginalResponse(env, interaction.token, {
-                embeds: [statusEmbed("Embed Tidak Dapat Diedit", result.error, ERROR_COLOR)],
+                embeds: [statusEmbed("Embed Cannot Be Edited", result.error, ERROR_COLOR)],
             });
         }
 
@@ -255,8 +247,8 @@ async function handleLookupSubmit(interaction, env) {
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
-                    "Embed Ditemukan",
-                    "Pesan berhasil diverifikasi. Tekan tombol di bawah untuk membuka formulir edit yang sudah terisi.",
+                    "Embed Found",
+                    "The message has been verified successfully. Click the button below to open the pre-filled edit form.",
                     INFO_COLOR,
                 ),
             ],
@@ -268,7 +260,7 @@ async function handleLookupSubmit(interaction, env) {
                             type: ComponentType.BUTTON,
                             style: ButtonStyle.PRIMARY,
                             custom_id: `${EDIT_BUTTON_PREFIX}${userId}:${messageId}`,
-                            label: "Lanjutkan Edit",
+                            label: "Continue Edit",
                         },
                     ],
                 },
@@ -279,8 +271,8 @@ async function handleLookupSubmit(interaction, env) {
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
-                    "Pesan Tidak Ditemukan",
-                    "Pesan tidak ditemukan di channel ini atau bot tidak memiliki izin untuk membacanya.",
+                    "Message Not Found",
+                    "The message was not found in this channel or the bot does not have permission to read it.",
                     ERROR_COLOR,
                 ),
             ],
@@ -295,15 +287,16 @@ async function handleEditButton(interaction, env) {
     const scope = parseScopedCustomId(interaction.data.custom_id, EDIT_BUTTON_PREFIX);
     if (!scope || scope.userId !== getUserId(interaction)) {
         return ephemeralStatus(
-            "Akses Ditolak",
-            "Tombol ini hanya dapat digunakan oleh Administrator yang memulai proses edit.",
+            "Access Denied",
+            "This button can only be used by Administrators who initiated the edit process.",
+            ERROR_COLOR,
         );
     }
 
     try {
         const result = await fetchEditableMessage(interaction, env, scope.messageId);
         if (result.error) {
-            return ephemeralStatus("Embed Tidak Dapat Diedit", result.error);
+            return ephemeralStatus("Failed", "Embed Cannot Be Edited", result.error, ERROR_COLOR);
         }
 
         return embedForm(`${EDIT_MODAL_PREFIX}${scope.userId}:${scope.messageId}`, "Edit Embed", {
@@ -314,8 +307,9 @@ async function handleEditButton(interaction, env) {
     } catch (error) {
         console.error("[embed:open-edit] Failed to fetch message:", error.message);
         return ephemeralStatus(
-            "Pesan Tidak Ditemukan",
-            "Pesan tidak ditemukan di channel ini atau bot tidak memiliki izin untuk membacanya.",
+            "Message Not Found",
+            "The message was not found in this channel or the bot does not have permission to read it.",
+            ERROR_COLOR,
         );
     }
 }
@@ -331,8 +325,8 @@ async function handleUpdateSubmit(interaction, env) {
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
-                    "Sesi Edit Tidak Valid",
-                    "Sesi edit ini tidak valid atau bukan milik Anda. Jalankan kembali perintah `/embed`.",
+                    "Invalid Edit Session",
+                    "This edit session is not valid or not yours. Please run the `/embed` command again.",
                     ERROR_COLOR,
                 ),
             ],
@@ -342,7 +336,7 @@ async function handleUpdateSubmit(interaction, env) {
     const input = readEmbedInput(interaction);
     if (input.error) {
         return editOriginalResponse(env, interaction.token, {
-            embeds: [statusEmbed("Embed Tidak Valid", input.error, ERROR_COLOR)],
+            embeds: [statusEmbed("Embed Invalid", input.error, ERROR_COLOR)],
         });
     }
 
@@ -350,7 +344,7 @@ async function handleUpdateSubmit(interaction, env) {
         const result = await fetchEditableMessage(interaction, env, scope.messageId);
         if (result.error) {
             return editOriginalResponse(env, interaction.token, {
-                embeds: [statusEmbed("Embed Tidak Dapat Diedit", result.error, ERROR_COLOR)],
+                embeds: [statusEmbed("Embed Cannot Be Edited", result.error, ERROR_COLOR)],
             });
         }
 
@@ -362,8 +356,8 @@ async function handleUpdateSubmit(interaction, env) {
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
-                    "Embed Berhasil Diedit",
-                    `Embed pada pesan \`${scope.messageId}\` telah diperbarui.`,
+                    "Embed Successfully Edited",
+                    `Embed on message \`${scope.messageId}\` has been updated.`,
                     SUCCESS_COLOR,
                 ),
             ],
@@ -373,8 +367,8 @@ async function handleUpdateSubmit(interaction, env) {
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
-                    "Gagal Mengedit Embed",
-                    "Bot tidak dapat memperbarui embed tersebut. Pastikan pesan masih tersedia dan izin bot tidak berubah, lalu coba lagi.",
+                    "Failed to Edit Embed",
+                    "The bot could not update the embed. Please ensure the message is still available and the bot's permissions have not changed, then try again.",
                     ERROR_COLOR,
                 ),
             ],
@@ -385,16 +379,16 @@ async function handleUpdateSubmit(interaction, env) {
 export default {
     name: "embed",
     definition: {
-        description: "Buat atau edit embed di channel ini",
+        description: "Create or edit embeds in this channel",
         default_member_permissions: "8",
         options: [
             {
-                name: "opsi",
-                description: "Pilih tindakan yang ingin dilakukan",
+                name: "option",
+                description: "Select the action you want to perform",
                 type: 3,
                 required: true,
                 choices: [
-                    { name: "Buat", value: "create" },
+                    { name: "Create", value: "create" },
                     { name: "Edit", value: "edit" },
                 ],
             },

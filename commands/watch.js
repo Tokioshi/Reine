@@ -1,6 +1,7 @@
+import config from "../config.js";
 import { searchAnime, getAnimeStatus } from "../utils/anilist.js";
 import { addAnime, getAnime } from "../utils/database.js";
-import { ephemeral, autocompleteResult } from "../utils/responses.js";
+import { ephemeralEmbed, autocompleteResult } from "../utils/responses.js";
 
 async function autocomplete(interaction, env) {
     const focused = interaction.data.options?.find((option) => option.focused)?.value ?? "";
@@ -33,10 +34,24 @@ async function execute(interaction, env) {
         10,
     );
 
-    if (Number.isNaN(anilistId)) return ephemeral("Invalid selection. Pick from the suggestions.");
+    if (Number.isNaN(anilistId))
+        return ephemeralEmbed([
+            {
+                title: "Failed",
+                color: config.color.error,
+                description: "Invalid selection. Pick from the suggestions.",
+            },
+        ]);
 
     const existing = await getAnime(env.DB, anilistId);
-    if (existing) return ephemeral(`**${existing.title}** is already on the watchlist.`);
+    if (existing)
+        return ephemeralEmbed([
+            {
+                title: "Failed",
+                color: config.color.error,
+                description: `**${existing.title}** is already on the watchlist.`,
+            },
+        ]);
 
     try {
         const status = await getAnimeStatus(env, anilistId);
@@ -52,12 +67,22 @@ async function execute(interaction, env) {
             ? `${status.latestEpisode}/${status.totalEpisodes}`
             : `${status.latestEpisode}`;
 
-        return ephemeral(
-            `✅ Added **${status.title}** to the watchlist.\nCurrently at episode **${epInfo}**. You'll be notified when a new episode airs.`,
-        );
+        return ephemeralEmbed([
+            {
+                title: "Success",
+                color: config.color.success,
+                description: `Added **${status.title}** to the watchlist.\nLatest episode: ${epInfo}`,
+            },
+        ]);
     } catch (err) {
         console.error("[watch execute]", err.message);
-        return ephemeral("Failed to fetch anime info. Try again later.");
+        return ephemeralEmbed([
+            {
+                title: "Failed",
+                color: config.color.error,
+                description: "Failed to fetch anime info. Try again later.",
+            },
+        ]);
     }
 }
 

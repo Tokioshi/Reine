@@ -1,11 +1,18 @@
+import config from "../config.js";
 import { getAllAnime } from "../utils/database.js";
-import { ephemeral, ephemeralEmbed } from "../utils/responses.js";
+import { ephemeralEmbed } from "../utils/responses.js";
 
 async function execute(_interaction, env) {
     const watchlist = await getAllAnime(env.DB);
 
     if (watchlist.length === 0) {
-        return ephemeral("The watchlist is empty. Use `/watch` to add an anime.");
+        return ephemeralEmbed([
+            {
+                title: "Watchlist Empty",
+                color: config.color.information,
+                description: "The watchlist is empty. Use `/watch` to add an anime.",
+            },
+        ]);
     }
 
     const lines = watchlist.map((anime, index) => {
@@ -15,9 +22,9 @@ async function execute(_interaction, env) {
 
     return ephemeralEmbed([
         {
-            title: "📋 Anime Watchlist",
+            title: "Anime Watchlist",
             description: lines.join("\n"),
-            color: 0x02a9ff,
+            color: config.color.neutral,
             footer: { text: `${watchlist.length} anime tracked` },
             timestamp: new Date().toISOString(),
         },

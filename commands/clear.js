@@ -1,5 +1,6 @@
+import config from "../config.js";
 import { fetchRecentMessages, bulkDeleteMessages } from "../utils/discord.js";
-import { ephemeral, ephemeralEmbed } from "../utils/responses.js";
+import { ephemeralEmbed } from "../utils/responses.js";
 
 async function execute(interaction, env) {
     const option = interaction.data.options?.find((option) => option.name === "amount");
@@ -21,7 +22,8 @@ async function execute(interaction, env) {
         if (ids.length < 2) {
             return ephemeralEmbed([
                 {
-                    color: 0xffff00,
+                    title: "Failed",
+                    color: config.color.error,
                     description: "There aren't enough recent messages to bulk delete.",
                 },
             ]);
@@ -31,8 +33,9 @@ async function execute(interaction, env) {
 
         return ephemeralEmbed([
             {
-                color: 0x39ff14,
-                description: `🧹 Deleted **${ids.length}** messages.`,
+                title: "Success",
+                color: config.color.success,
+                description: `Deleted **${ids.length}** messages.`,
             },
         ]);
     } catch (err) {
@@ -40,8 +43,9 @@ async function execute(interaction, env) {
 
         return ephemeralEmbed([
             {
-                color: 0xff0000,
-                description: `❌ Failed to delete messages.\n${err.message}`,
+                title: "Failed",
+                color: config.color.error,
+                description: `Failed to delete messages.\nRefer to the console for more information.`,
             },
         ]);
     }

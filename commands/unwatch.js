@@ -1,5 +1,6 @@
+import config from "../config.js";
 import { removeAnime, getAllAnime, getAnime } from "../utils/database.js";
-import { ephemeral, autocompleteResult } from "../utils/responses.js";
+import { ephemeralEmbed, autocompleteResult } from "../utils/responses.js";
 
 async function autocomplete(interaction, env) {
     const focused = (
@@ -21,13 +22,33 @@ async function execute(interaction, env) {
         10,
     );
 
-    if (Number.isNaN(anilistId)) return ephemeral("Invalid selection. Pick from the suggestions.");
+    if (Number.isNaN(anilistId))
+        return ephemeralEmbed([
+            {
+                title: "Failed",
+                color: config.color.error,
+                description: "Invalid selection. Pick from the suggestions.",
+            },
+        ]);
 
     const anime = await getAnime(env.DB, anilistId);
-    if (!anime) return ephemeral("That anime is not on the watchlist.");
+    if (!anime)
+        return ephemeralEmbed([
+            {
+                title: "Failed",
+                color: config.color.error,
+                description: "That anime is not on the watchlist.",
+            },
+        ]);
 
     await removeAnime(env.DB, anilistId);
-    return ephemeral(`🗑️ Removed **${anime.title}** from the watchlist.`);
+    return ephemeralEmbed([
+        {
+            title: "Success",
+            color: config.color.success,
+            description: `Removed **${anime.title}** from the watchlist.`,
+        },
+    ]);
 }
 
 export default {

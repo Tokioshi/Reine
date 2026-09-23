@@ -1,3 +1,4 @@
+import config from "../config.js";
 import { ComponentType, TextInputStyle } from "../utils/constants.js";
 import { sendMessage, sendMessageWithFiles, editOriginalResponse } from "../utils/discord.js";
 import { modal, getModalText, getModalFiles } from "../utils/responses.js";
@@ -81,7 +82,13 @@ async function handleModalSubmit(interaction, env) {
         }
 
         return editOriginalResponse(env, interaction.token, {
-            embeds: [{ description: "You've just sent a message as bot!", color: 0x2ecc71 }],
+            embeds: [
+                {
+                    title: "Success",
+                    description: "You've just sent a message as bot!",
+                    color: config.color.success,
+                },
+            ],
         });
     } catch (err) {
         console.error("[message modal] Failed to send:", err.message);
@@ -90,8 +97,8 @@ async function handleModalSubmit(interaction, env) {
             embeds: [
                 {
                     description:
-                        "Failed to send announcement.\nPlease check the message ID (if used) and attachments, then try again.",
-                    color: 0xe74c3c,
+                        "Failed to send message as bot.\nRefer to the console for more information.",
+                    color: config.color.error,
                 },
             ],
         });

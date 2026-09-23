@@ -1,5 +1,6 @@
+import config from "../config.js";
 import { banUser } from "../utils/discord.js";
-import { ephemeral, ephemeralEmbed } from "../utils/responses.js";
+import { ephemeralEmbed } from "../utils/responses.js";
 
 async function execute(interaction, env) {
     const options = interaction.data.options ?? [];
@@ -9,8 +10,9 @@ async function execute(interaction, env) {
     if (!userId)
         return ephemeralEmbed([
             {
-                color: 0xffff00,
-                description: "No user selected.",
+                title: "Failed",
+                color: config.color.error,
+                description: "Please select a user to ban.",
             },
         ]);
 
@@ -22,9 +24,9 @@ async function execute(interaction, env) {
 
         return ephemeralEmbed([
             {
-                title: `🔨 Banned ${displayName}`,
+                title: `Banned ${displayName}`,
                 description: reason ? `Reason: ${reason}` : "No reason provided.",
-                color: 0x39ff14,
+                color: config.color.success,
                 timestamp: new Date().toISOString(),
             },
         ]);
@@ -32,8 +34,9 @@ async function execute(interaction, env) {
         console.error("[ban]", err.message);
         return ephemeralEmbed([
             {
-                color: 0xff0000,
-                description: `❌ Failed to ban **${displayName}**.\n${err.message}`,
+                title: "Failed",
+                color: config.color.error,
+                description: `Failed to ban **${displayName}**.\nRefer to the console for more information.`,
             },
         ]);
     }

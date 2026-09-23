@@ -1,10 +1,11 @@
+import config from "../config.js";
 import { PermissionFlags } from "../utils/constants.js";
 import {
     ticketComponentHandlers,
     ticketModalHandlers,
     ticketPanelResponse,
 } from "../utils/tickets.js";
-import { ephemeral } from "../utils/responses.js";
+import { ephemeralEmbed } from "../utils/responses.js";
 
 function isAdministrator(interaction) {
     try {
@@ -17,7 +18,13 @@ function isAdministrator(interaction) {
 
 function execute(interaction) {
     if (!interaction.guild_id || !isAdministrator(interaction)) {
-        return ephemeral("Only a server administrator can create the ticket panel.");
+        return ephemeralEmbed([
+            {
+                title: "Failed",
+                color: config.color.error,
+                description: "You must be an administrator to use this command.",
+            },
+        ]);
     }
 
     return ticketPanelResponse();
