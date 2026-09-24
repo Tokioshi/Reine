@@ -4,11 +4,7 @@ import {
     findInteractionHandler,
     modalHandlers,
 } from "./commands.js";
-import {
-    InteractionResponseType,
-    InteractionType,
-    MessageFlags,
-} from "../utils/constants.js";
+import { InteractionResponseType, InteractionType, MessageFlags } from "../utils/constants.js";
 import { json, methodNotAllowed } from "../utils/http.js";
 import { readAndVerifyDiscordRequest } from "../utils/verify.js";
 
@@ -31,7 +27,7 @@ async function handleAutocomplete(interaction, env) {
     }
 }
 
-async function handleApplicationCommand(interaction, env) {
+async function handleApplicationCommand(interaction, env, ctx) {
     const command = commandHandlers[interaction.data?.name];
     if (!command) {
         return json({
@@ -41,7 +37,14 @@ async function handleApplicationCommand(interaction, env) {
     }
 
     try {
-        return json(await command.execute(interaction, env));
+        const result = await command.execute(interaction, env);
+        const response = result.response ?? result;
+
+        if (result.afterResponse) {
+            ctx.waitUntil(result.afterResponse(env));
+        }
+
+        return json(response);
     } catch (error) {
         console.error(`[command:${interaction.data?.name}] Error:`, error.message);
         return json({
@@ -106,7 +109,7 @@ export async function handleDiscordInteraction(request, env, ctx) {
         case InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE:
             return handleAutocomplete(interaction, env);
         case InteractionType.APPLICATION_COMMAND:
-            return handleApplicationCommand(interaction, env);
+            return handleApplicationCommand(interaction, env, ctx);
         case InteractionType.MESSAGE_COMPONENT:
             return handleMessageComponent(interaction, env);
         case InteractionType.MODAL_SUBMIT:

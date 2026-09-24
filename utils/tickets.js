@@ -21,12 +21,7 @@ import {
     markTicketFailed,
     markTicketOpen,
 } from "./ticket-database.js";
-import {
-    ButtonStyle,
-    ComponentType,
-    PermissionFlags,
-    TextInputStyle,
-} from "./constants.js";
+import { ButtonStyle, ComponentType, PermissionFlags, TextInputStyle } from "./constants.js";
 import { ephemeral, getModalText, getModalValues, modal } from "./responses.js";
 
 const DEFAULT_TICKET_ROLE_IDS = [
@@ -145,42 +140,59 @@ function closeButton(disabled = false) {
     };
 }
 
-export function ticketPanelResponse() {
+export function ticketPanelPayload() {
     return {
-        type: 4,
-        data: {
-            allowed_mentions: { parse: [] },
-            embeds: [
-                {
-                    color: 0xce0200,
-                    title: "Ticket Service",
-                    description:
-                        "Choose **Buy** to order a service or **Ask** to open a consultation ticket. Please do not create duplicate tickets.",
-                    footer: { text: "One active ticket is allowed per member." },
+        embeds: [
+            {
+                color: 0xce0200,
+                author: {
+                    name: "Harmony Hub — Ticket Service",
+                    icon_url: "https://cdn.discordapp.com/icons/1101864405492306040/e54e9e26a4e2c227121b517b7adb239f.png?size=1024",
                 },
-            ],
-            components: [
-                {
-                    type: ComponentType.ACTION_ROW,
-                    components: [
-                        {
-                            type: ComponentType.BUTTON,
-                            custom_id: IDS.BUY_BUTTON,
-                            label: "Buy",
-                            emoji: { name: "🏷️" },
-                            style: ButtonStyle.PRIMARY,
-                        },
-                        {
-                            type: ComponentType.BUTTON,
-                            custom_id: IDS.ASK_BUTTON,
-                            label: "Ask",
-                            emoji: { name: "✋" },
-                            style: ButtonStyle.SECONDARY,
-                        },
-                    ],
+                description:
+                    "Welcome to the **Harmony Hub** ticket system.\nSelect an option below to continue.",
+                fields: [
+                    {
+                        name: "🏷️ Buy",
+                        value: "Order a development service (bot, tools, etc).",
+                        inline: true,
+                    },
+                    {
+                        name: "✋ Ask",
+                        value: "Consultation before ordering or general questions.",
+                        inline: true,
+                    },
+                ],
+                image: {
+                    url: "https://i.pinimg.com/1200x/5c/ff/be/5cffbe0205462492b0d7fae908db8929.jpg",
                 },
-            ],
-        },
+                footer: {
+                    text: "Only 1 active ticket allowed per member",
+                },
+                timestamp: new Date().toISOString(),
+            },
+        ],
+        components: [
+            {
+                type: ComponentType.ACTION_ROW,
+                components: [
+                    {
+                        type: ComponentType.BUTTON,
+                        custom_id: IDS.BUY_BUTTON,
+                        label: "Buy",
+                        emoji: { name: "🏷️" },
+                        style: ButtonStyle.PRIMARY,
+                    },
+                    {
+                        type: ComponentType.BUTTON,
+                        custom_id: IDS.ASK_BUTTON,
+                        label: "Ask",
+                        emoji: { name: "✋" },
+                        style: ButtonStyle.SECONDARY,
+                    },
+                ],
+            },
+        ],
     };
 }
 
@@ -385,7 +397,10 @@ async function createTicketFromModal(interaction, env, type) {
             try {
                 await modifyThread(env, thread.id, { locked: true, archived: true });
             } catch (cleanupError) {
-                console.error("[ticket] Failed to archive incomplete thread:", cleanupError.message);
+                console.error(
+                    "[ticket] Failed to archive incomplete thread:",
+                    cleanupError.message,
+                );
             }
         }
 
@@ -521,7 +536,10 @@ export async function recoverTickets(env) {
                         if (!error.message.includes("Discord API error 404")) throw error;
                     }
 
-                    if (thread && !(thread.thread_metadata?.archived && thread.thread_metadata?.locked)) {
+                    if (
+                        thread &&
+                        !(thread.thread_metadata?.archived && thread.thread_metadata?.locked)
+                    ) {
                         if (thread.thread_metadata?.archived) {
                             await modifyThread(env, ticket.thread_id, { archived: false });
                         }

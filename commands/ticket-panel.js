@@ -3,9 +3,10 @@ import { PermissionFlags } from "../utils/constants.js";
 import {
     ticketComponentHandlers,
     ticketModalHandlers,
-    ticketPanelResponse,
+    ticketPanelPayload,
 } from "../utils/tickets.js";
-import { ephemeralEmbed } from "../utils/responses.js";
+import { editOriginalResponse, sendMessage } from "../utils/discord.js";
+import { ephemeral, ephemeralEmbed } from "../utils/responses.js";
 
 function isAdministrator(interaction) {
     try {
@@ -27,7 +28,22 @@ function execute(interaction) {
         ]);
     }
 
-    return ticketPanelResponse();
+    return {
+        response: ephemeral("Sending ticket panel..."),
+        afterResponse: async (env) => {
+            try {
+                await sendMessage(env, interaction.channel_id, ticketPanelPayload());
+                await editOriginalResponse(env, interaction.token, {
+                    content: "Successfully sent ticket panel!",
+                });
+            } catch (error) {
+                console.error("[ticket-panel] Error:", error.message);
+                await editOriginalResponse(env, interaction.token, {
+                    content: "Failed to send ticket panel.",
+                });
+            }
+        },
+    };
 }
 
 export default {
