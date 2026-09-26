@@ -77,6 +77,29 @@ export async function markTicketClosed(db, ticketId) {
         .run();
 }
 
+export async function markTicketReopened(db, ticketId) {
+    const result = await db
+        .prepare(
+            `UPDATE tickets
+             SET status = 'open', closed_by = NULL, close_reason = NULL,
+                 closed_at = NULL, updated_at = CURRENT_TIMESTAMP
+             WHERE id = ? AND status = 'closed'`,
+        )
+        .bind(ticketId)
+        .run();
+
+    return result.meta.changes === 1;
+}
+
+export async function deleteTicket(db, ticketId) {
+    const result = await db
+        .prepare("DELETE FROM tickets WHERE id = ? AND status = 'closed'")
+        .bind(ticketId)
+        .run();
+
+    return result.meta.changes === 1;
+}
+
 export async function markTicketFailed(db, ticketId, reason) {
     await db
         .prepare(

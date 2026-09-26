@@ -56,6 +56,14 @@ export function getChannel(env, channelId) {
     return discordRequest(env, "GET", `/channels/${channelId}`);
 }
 
+export function deleteChannel(env, channelId) {
+    return discordRequest(env, "DELETE", `/channels/${channelId}`);
+}
+
+export function getGuildMember(env, guildId, userId) {
+    return discordRequest(env, "GET", `/guilds/${guildId}/members/${userId}`);
+}
+
 export function createPrivateThread(env, parentChannelId, payload) {
     return discordRequest(env, "POST", `/channels/${parentChannelId}/threads`, {
         type: 12,
