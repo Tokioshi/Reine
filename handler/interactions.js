@@ -54,7 +54,7 @@ async function handleApplicationCommand(interaction, env, ctx) {
     }
 }
 
-async function handleMessageComponent(interaction, env) {
+async function handleMessageComponent(interaction, env, ctx) {
     const handler = findInteractionHandler(componentHandlers, interaction.data?.custom_id);
     if (!handler) {
         return json({
@@ -64,7 +64,14 @@ async function handleMessageComponent(interaction, env) {
     }
 
     try {
-        return json(await handler(interaction, env));
+        const result = await handler(interaction, env);
+        const response = result.response ?? result;
+
+        if (result.afterResponse) {
+            ctx.waitUntil(result.afterResponse(env));
+        }
+
+        return json(response);
     } catch (error) {
         console.error(`[component:${interaction.data?.custom_id}] Error:`, error.message);
         return json({
@@ -111,7 +118,7 @@ export async function handleDiscordInteraction(request, env, ctx) {
         case InteractionType.APPLICATION_COMMAND:
             return handleApplicationCommand(interaction, env, ctx);
         case InteractionType.MESSAGE_COMPONENT:
-            return handleMessageComponent(interaction, env);
+            return handleMessageComponent(interaction, env, ctx);
         case InteractionType.MODAL_SUBMIT:
             return handleModal(interaction, env, ctx);
         default:
