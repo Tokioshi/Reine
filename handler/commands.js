@@ -6,11 +6,13 @@ import message from "../commands/message.js";
 import ticketPanel from "../commands/ticket-panel.js";
 import unwatch from "../commands/unwatch.js";
 import watch from "../commands/watch.js";
+import interaction from "../commands/interaction.js";
+import { priceListComponentHandlers } from "../components/price-list.js";
 import { registerGuildCommands } from "../utils/discord.js";
 import { json, methodNotAllowed } from "../utils/http.js";
 
 // Workers cannot discover files at runtime, so new commands are added to this list.
-const commands = [watch, unwatch, list, clear, ban, message, embed, ticketPanel];
+const commands = [watch, unwatch, list, clear, ban, message, embed, ticketPanel, interaction];
 
 export const commandHandlers = Object.fromEntries(
     commands.map((command) => [
@@ -26,6 +28,7 @@ export const commandDefinitions = commands.map(({ name, definition }) => ({
 
 export const componentHandlers = Object.assign(
     {},
+    priceListComponentHandlers,
     ...commands.map((command) => command.componentHandlers ?? {}),
 );
 
