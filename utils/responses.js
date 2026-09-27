@@ -7,10 +7,14 @@ export function ephemeral(content) {
     };
 }
 
-export function ephemeralEmbed(embeds) {
+export function ephemeralEmbed(embeds, components) {
     return {
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { embeds, flags: MessageFlags.EPHEMERAL },
+        data: {
+            embeds,
+            ...(components ? { components } : {}),
+            flags: MessageFlags.EPHEMERAL,
+        },
     };
 }
 
