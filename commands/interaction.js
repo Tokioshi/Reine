@@ -1,6 +1,7 @@
 import config from "../config.js";
 import { ephemeralEmbed } from "../utils/responses.js";
 import { editOriginalResponse, sendMessage } from "../utils/discord.js";
+import { ComponentType } from "../utils/constants.js";
 
 function execute(interaction) {
     return {
@@ -16,99 +17,59 @@ function execute(interaction) {
                 await sendMessage(env, interaction.channel_id, {
                     embeds: [
                         {
-                            title: "Discord Bot - Price List",
-                            color: 3750465,
                             description:
-                                "**Penting untuk dibaca:**  \nDaftar harga di bawah ini menampilkan pilihan layanan pembuatan bot Discord berdasarkan kebutuhan, tingkat kompleksitas, dan fitur yang diminta. Mohon membaca setiap benefit dan ketentuan dengan teliti agar tidak terjadi kesalahpahaman sebelum pemesanan.\n\n**Disclaimer:**  \nSetiap server Discord memiliki kebutuhan yang berbeda. Harga final dapat disesuaikan setelah proses konsultasi dan pengecekan brief. Kesalahan akibat informasi yang tidak lengkap dari pembeli atau perubahan permintaan di luar brief awal dapat memengaruhi biaya dan estimasi pengerjaan.\n\n**Penggunaan:**\nSilahkan klik tombol di bawah ini untuk menampilkan seluruh informasi, juga harga yang tertera untuk bot Discord. Harap baca dengan teliti untuk menentukan kebutuhan Anda, dan keperluan Anda. Segala kesalahpahaman Client karena kurangnya membaca, **bukan tanggung jawab** Harmony Hub.",
+                                "**Penting untuk dibaca:** Daftar harga di bawah ini menampilkan berbagai paket layanan pembuatan dan konfigurasi Server Discord. Mohon untuk membaca dengan teliti setiap manfaat dan ketentuan yang berlaku pada masing-masing paket untuk menghindari kesalahpahaman di kemudian hari.\n\n**Penegasan:** Kekeliruan atau kesalahan yang terjadi akibat ketidaktelitian Klien dalam membaca informasi ini bukan menjadi tanggung jawab Harmony Hub. Kami sangat menyarankan Klien untuk membaca keseluruhan informasi ini sebelum melakukan pemesanan.",
+                            title: "Harga Layanan Pembuatan Server Discord - Harmony Hub",
+                            color: config.color.default,
                         },
                     ],
                     components: [
                         {
-                            type: 1,
+                            type: ComponentType.ACTION_ROW,
                             components: [
                                 {
-                                    type: 3,
+                                    type: ComponentType.STRING_SELECT,
                                     options: [
                                         {
-                                            label: "Harga Bot Discord",
-                                            value: "bot_price",
+                                            label: "Paket Dasar",
+                                            value: "basic_package",
                                             emoji: {
-                                                name: "💸",
-                                            },
-                                            description: "Melihat seluruh harga bot Discord",
-                                        },
-                                        {
-                                            label: "Harga Maintenance",
-                                            value: "maintenance_price",
-                                            emoji: {
-                                                name: "⚠️",
-                                            },
-                                            description: "Harga untuk maintenance bulanan",
-                                        },
-                                        {
-                                            label: "Add-on Dan Tambahan Fitur",
-                                            value: "add_on",
-                                            description: "List harga penambahan fitur diluar paket",
-                                            emoji: {
-                                                name: "🏟️",
+                                                name: "🍙",
                                             },
                                         },
                                         {
-                                            label: "Informasi Pembayaran",
-                                            value: "payment_info",
+                                            label: "Paket Reguler",
+                                            value: "regular_package",
                                             emoji: {
-                                                name: "💳",
-                                            },
-                                            description:
-                                                "List informasi tentang seluruh pembayaran",
-                                        },
-                                        {
-                                            label: "Ketentuan Layanan",
-                                            value: "service_terms",
-                                            description: "Harap baca sebelum melakukan pembelian",
-                                            emoji: {
-                                                name: "📑",
+                                                name: "🍻",
                                             },
                                         },
                                         {
-                                            label: "Frequently Asked Question",
-                                            value: "faq",
+                                            label: "Paket Lite",
+                                            value: "lite_package",
                                             emoji: {
-                                                name: "❓",
-                                            },
-                                            description: "Jawaban  yang mungkin Anda cari",
-                                        },
-                                        {
-                                            label: "Cara Pemesanan",
-                                            value: "order_guide",
-                                            emoji: {
-                                                name: "🤔",
-                                            },
-                                            description: "Bingung? Klik ini aja yaa",
-                                        },
-                                        {
-                                            label: "Panduan Pemilihan Paket",
-                                            value: "package_guide",
-                                            description:
-                                                "Cek ini kalo mau liat saran pemilihan paket",
-                                            emoji: {
-                                                name: "📮",
+                                                name: "🍣",
                                             },
                                         },
                                         {
-                                            label: "Catatan Penting",
-                                            value: "important_notes",
+                                            label: "Paket Enterprise",
+                                            value: "enterprise_package",
                                             emoji: {
-                                                name: "❗",
+                                                name: "🍗",
                                             },
-                                            description: "Penting untuk di baca!",
+                                        },
+                                        {
+                                            label: "Catatan Tambahan",
+                                            value: "extra_notes",
+                                            emoji: {
+                                                name: "📚",
+                                            },
                                         },
                                     ],
-                                    flows: {},
-                                    custom_id: "bot_price_list_select",
+                                    custom_id: "server_price_list",
                                     min_values: 1,
                                     max_values: 1,
-                                    placeholder: "Klik ini dan buat pilihan",
+                                    placeholder: "Pilih Paket Yang Anda Inginkan",
                                 },
                             ],
                         },
