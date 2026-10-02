@@ -109,18 +109,32 @@ export function editOriginalResponse(env, interactionToken, payload) {
 export async function sendMessageWithFiles(
     env,
     channelId,
-    { content, files = [], messageReference } = {},
+    { content, files = [], messageReference, ...messagePayload } = {},
 ) {
-    const payload = {};
+    const payload = { ...messagePayload };
     if (content) payload.content = content;
     if (messageReference) payload.message_reference = { message_id: messageReference };
 
+    return discordRequestWithFiles(env, "POST", `/channels/${channelId}/messages`, payload, files);
+}
+
+export function editMessageWithFiles(env, channelId, messageId, payload, files) {
+    return discordRequestWithFiles(
+        env,
+        "PATCH",
+        `/channels/${channelId}/messages/${messageId}`,
+        payload,
+        files,
+    );
+}
+
+async function discordRequestWithFiles(env, method, path, payload, files = []) {
     const form = new FormData();
     form.append("payload_json", JSON.stringify(payload));
     files.forEach((file, index) => form.append(`files[${index}]`, file.blob, file.name));
 
-    const res = await fetch(`${env.DISCORD_API_BASE}/channels/${channelId}/messages`, {
-        method: "POST",
+    const res = await fetch(`${env.DISCORD_API_BASE}${path}`, {
+        method,
         headers: { Authorization: `Bot ${env.BOT_TOKEN}` },
         body: form,
     });
