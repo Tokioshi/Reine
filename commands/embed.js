@@ -1,7 +1,14 @@
 import config from "../config.js";
 import { ButtonStyle, ComponentType, PermissionFlags, TextInputStyle } from "../utils/constants.js";
-import { editMessage, editOriginalResponse, getMessage, sendMessage } from "../utils/discord.js";
-import { ephemeralEmbed, getModalText, modal } from "../utils/responses.js";
+import {
+    editMessage,
+    editMessageWithFiles,
+    editOriginalResponse,
+    getMessage,
+    sendMessage,
+    sendMessageWithFiles,
+} from "../utils/discord.js";
+import { ephemeralEmbed, getModalFiles, getModalText, modal } from "../utils/responses.js";
 
 const CREATE_MODAL_ID = "embed:create";
 const EDIT_LOOKUP_MODAL_ID = "embed:lookup";
@@ -10,6 +17,12 @@ const EDIT_MODAL_PREFIX = "embed:update:";
 const SUCCESS_COLOR = config.color.success;
 const ERROR_COLOR = config.color.error;
 const INFO_COLOR = config.color.information;
+const IMAGE_EXTENSIONS = new Map([
+    ["image/png", "png"],
+    ["image/jpeg", "jpg"],
+    ["image/gif", "gif"],
+    ["image/webp", "webp"],
+]);
 
 function getUserId(interaction) {
     return interaction.member?.user?.id ?? interaction.user?.id ?? null;
@@ -49,7 +62,7 @@ function modalField(label, customId, style, options = {}) {
 function embedForm(customId, title, values = {}) {
     return modal(customId, title, [
         modalField("Title", "title", TextInputStyle.SHORT, {
-            min_length: 1,
+            required: false,
             max_length: 256,
             placeholder: "Enter embed title",
             ...(values.title ? { value: values.title } : {}),
@@ -66,6 +79,16 @@ function embedForm(customId, title, values = {}) {
             placeholder: "Enter embed description",
             ...(values.description ? { value: values.description } : {}),
         }),
+        {
+            type: ComponentType.LABEL,
+            label: "Image (Optional)",
+            component: {
+                type: ComponentType.FILE_UPLOAD,
+                custom_id: "image",
+                required: false,
+                max_values: 1,
+            },
+        },
     ]);
 }
 
@@ -91,8 +114,8 @@ function readEmbedInput(interaction) {
     const description = getModalText(interaction, "description")?.trim() ?? "";
     const color = parseColor(getModalText(interaction, "color") ?? "");
 
-    if (!title || !description) {
-        return { error: "Title and description cannot be empty." };
+    if (!description) {
+        return { error: "Description cannot be empty." };
     }
 
     if (color === null) {
@@ -101,7 +124,33 @@ function readEmbedInput(interaction) {
         };
     }
 
-    return { embed: { title, description, color } };
+    return {
+        embed: {
+            ...(title ? { title } : {}),
+            description,
+            color,
+        },
+    };
+}
+
+async function readUploadedImage(interaction) {
+    const [attachment] = getModalFiles(interaction, "image");
+    if (!attachment) return { file: null };
+
+    const contentType = attachment.content_type?.split(";")[0].toLowerCase();
+    const extension = IMAGE_EXTENSIONS.get(contentType);
+    if (!extension) {
+        return { error: "Please upload a PNG, JPG, GIF, or WebP image." };
+    }
+
+    const fileName = `embed-image.${extension}`;
+    const response = await fetch(attachment.url);
+    if (!response.ok) throw new Error(`Failed to fetch image: ${response.status}`);
+
+    return {
+        file: { blob: await response.blob(), name: fileName },
+        url: `attachment://${fileName}`,
+    };
 }
 
 function parseScopedCustomId(customId, prefix) {
@@ -138,13 +187,13 @@ async function fetchEditableMessage(interaction, env, messageId) {
     }
 
     const embed = message.embeds[0];
-    if (!embed.title || !embed.description) {
+    if (!embed.description) {
         return {
-            error: "The embed does not have a complete title and description, so it cannot be edited through this form.",
+            error: "The embed does not have a description, so it cannot be edited through this form.",
         };
     }
 
-    if (embed.title.length > 256 || embed.description.length > 4000) {
+    if ((embed.title?.length ?? 0) > 256 || embed.description.length > 4000) {
         return {
             error: "The embed title or description exceeds the limit that can be loaded by the edit form.",
         };
@@ -157,7 +206,7 @@ function execute(interaction) {
     const accessError = validateAccess(interaction);
     if (accessError) return accessError;
 
-    const action = interaction.data.options?.find((option) => option.name === "opsi")?.value;
+    const action = interaction.data.options?.find((option) => option.name === "option")?.value;
 
     if (action === "create") return embedForm(CREATE_MODAL_ID, "Create Embed");
 
@@ -188,16 +237,33 @@ async function handleCreateSubmit(interaction, env) {
     }
 
     try {
-        const message = await sendMessage(env, interaction.channel_id, {
-            embeds: [input.embed],
+        const uploadedImage = await readUploadedImage(interaction);
+        if (uploadedImage.error) {
+            return editOriginalResponse(env, interaction.token, {
+                embeds: [statusEmbed("Invalid Image", uploadedImage.error, ERROR_COLOR)],
+            });
+        }
+
+        const embed = {
+            ...input.embed,
+            ...(uploadedImage.url ? { image: { url: uploadedImage.url } } : {}),
+        };
+        const messagePayload = {
+            embeds: [embed],
             allowed_mentions: { parse: [] },
-        });
+        };
+        const message = uploadedImage.file
+            ? await sendMessageWithFiles(env, interaction.channel_id, {
+                  ...messagePayload,
+                  files: [uploadedImage.file],
+              })
+            : await sendMessage(env, interaction.channel_id, messagePayload);
 
         return editOriginalResponse(env, interaction.token, {
             embeds: [
                 statusEmbed(
                     "Embed Created Successfully",
-                    `The embed has been sent to this channel. Message ID: \`${message.id}\``,
+                    "The embed has been sent to this channel.",
                     SUCCESS_COLOR,
                 ),
             ],
@@ -244,14 +310,17 @@ async function handleLookupSubmit(interaction, env) {
         }
 
         const userId = getUserId(interaction);
+        const foundEmbed = statusEmbed(
+            "Embed Found",
+            "The message has been verified successfully. Click the button below to open the pre-filled edit form.",
+            INFO_COLOR,
+        );
+        if (result.embed.image?.url) {
+            foundEmbed.image = { url: result.embed.image.url };
+        }
+
         return editOriginalResponse(env, interaction.token, {
-            embeds: [
-                statusEmbed(
-                    "Embed Found",
-                    "The message has been verified successfully. Click the button below to open the pre-filled edit form.",
-                    INFO_COLOR,
-                ),
-            ],
+            embeds: [foundEmbed],
             components: [
                 {
                     type: ComponentType.ACTION_ROW,
@@ -348,10 +417,52 @@ async function handleUpdateSubmit(interaction, env) {
             });
         }
 
-        await editMessage(env, interaction.channel_id, scope.messageId, {
-            embeds: [input.embed],
+        const uploadedImage = await readUploadedImage(interaction);
+        if (uploadedImage.error) {
+            return editOriginalResponse(env, interaction.token, {
+                embeds: [statusEmbed("Invalid Image", uploadedImage.error, ERROR_COLOR)],
+            });
+        }
+
+        const image = uploadedImage.url
+            ? { url: uploadedImage.url }
+            : result.embed.image?.url
+              ? { url: result.embed.image.url }
+              : null;
+        const embed = {
+            ...input.embed,
+            ...(image ? { image } : {}),
+        };
+        const messagePayload = {
+            embeds: [embed],
             allowed_mentions: { parse: [] },
-        });
+            ...(uploadedImage.file
+                ? {
+                      attachments: [
+                          ...(result.message.attachments ?? []).map(
+                              ({ id, filename, description }) => ({
+                                  id,
+                                  filename,
+                                  ...(description ? { description } : {}),
+                              }),
+                          ),
+                          { id: "0", filename: uploadedImage.file.name },
+                      ],
+                  }
+                : {}),
+        };
+
+        if (uploadedImage.file) {
+            await editMessageWithFiles(
+                env,
+                interaction.channel_id,
+                scope.messageId,
+                messagePayload,
+                [uploadedImage.file],
+            );
+        } else {
+            await editMessage(env, interaction.channel_id, scope.messageId, messagePayload);
+        }
 
         return editOriginalResponse(env, interaction.token, {
             embeds: [
