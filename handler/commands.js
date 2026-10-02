@@ -7,7 +7,9 @@ import ticketPanel from "../commands/ticket-panel.js";
 import unwatch from "../commands/unwatch.js";
 import watch from "../commands/watch.js";
 import interaction from "../commands/interaction.js";
-import { priceListComponentHandlers } from "../components/price-list.js";
+import { faqComponentHandlers } from "../components/faq.js";
+import { priceListComponentHandlers } from "../components/bot-price-list.js";
+import { serverPriceListComponentHandlers } from "../components/server-price-list.js";
 import { registerGuildCommands } from "../utils/discord.js";
 import { json, methodNotAllowed } from "../utils/http.js";
 
@@ -29,6 +31,8 @@ export const commandDefinitions = commands.map(({ name, definition }) => ({
 export const componentHandlers = Object.assign(
     {},
     priceListComponentHandlers,
+    faqComponentHandlers,
+    serverPriceListComponentHandlers,
     ...commands.map((command) => command.componentHandlers ?? {}),
 );
 
