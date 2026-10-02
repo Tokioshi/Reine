@@ -8,6 +8,7 @@ import unwatch from "../commands/unwatch.js";
 import watch from "../commands/watch.js";
 import interaction from "../commands/interaction.js";
 import { faqComponentHandlers } from "../components/faq.js";
+import { paymentMethodComponentHandlers } from "../components/payment-method.js";
 import { priceListComponentHandlers } from "../components/bot-price-list.js";
 import { serverPriceListComponentHandlers } from "../components/server-price-list.js";
 import { registerGuildCommands } from "../utils/discord.js";
@@ -32,6 +33,7 @@ export const componentHandlers = Object.assign(
     {},
     priceListComponentHandlers,
     faqComponentHandlers,
+    paymentMethodComponentHandlers,
     serverPriceListComponentHandlers,
     ...commands.map((command) => command.componentHandlers ?? {}),
 );
