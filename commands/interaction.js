@@ -17,9 +17,9 @@ function execute(interaction) {
                 await sendMessage(env, interaction.channel_id, {
                     embeds: [
                         {
+                            title: "Metode Pembayaran",
                             description:
-                                "**Penting untuk dibaca:** Daftar harga di bawah ini menampilkan berbagai paket layanan pembuatan dan konfigurasi Server Discord. Mohon untuk membaca dengan teliti setiap manfaat dan ketentuan yang berlaku pada masing-masing paket untuk menghindari kesalahpahaman di kemudian hari.\n\n**Penegasan:** Kekeliruan atau kesalahan yang terjadi akibat ketidaktelitian Klien dalam membaca informasi ini bukan menjadi tanggung jawab Harmony Hub. Kami sangat menyarankan Klien untuk membaca keseluruhan informasi ini sebelum melakukan pemesanan.",
-                            title: "Harga Layanan Pembuatan Server Discord - Harmony Hub",
+                                "Berikut adalah informasi lengkap mengenai metode pembayaran yang tersedia di Harmony Hub. Mohon untuk membaca dengan teliti dan pastikan melakukan transaksi dengan benar sesuai petunjuk yang diberikan untuk menghindari kesalahan pengiriman dana.",
                             color: config.color.default,
                         },
                     ],
@@ -31,45 +31,38 @@ function execute(interaction) {
                                     type: ComponentType.STRING_SELECT,
                                     options: [
                                         {
-                                            label: "Paket Dasar",
-                                            value: "basic_package",
+                                            label: "Gopay Transfer",
+                                            value: "gopay_transfer",
                                             emoji: {
-                                                name: "🍙",
+                                                name: "💳",
                                             },
                                         },
                                         {
-                                            label: "Paket Reguler",
-                                            value: "regular_package",
+                                            label: "Scan QRIS",
+                                            value: "scan_qris",
                                             emoji: {
-                                                name: "🍻",
+                                                name: "📱",
                                             },
                                         },
                                         {
-                                            label: "Paket Lite",
-                                            value: "lite_package",
+                                            label: "Trakteer",
+                                            value: "trakteer",
                                             emoji: {
-                                                name: "🍣",
+                                                name: "🧧",
                                             },
                                         },
                                         {
-                                            label: "Paket Enterprise",
-                                            value: "enterprise_package",
+                                            label: "Disclaimer",
+                                            value: "disclaimer",
                                             emoji: {
-                                                name: "🍗",
-                                            },
-                                        },
-                                        {
-                                            label: "Catatan Tambahan",
-                                            value: "extra_notes",
-                                            emoji: {
-                                                name: "📚",
+                                                name: "⚖️",
                                             },
                                         },
                                     ],
-                                    custom_id: "server_price_list",
+                                    custom_id: "payment_method_select",
                                     min_values: 1,
                                     max_values: 1,
-                                    placeholder: "Pilih Paket Yang Anda Inginkan",
+                                    placeholder: "Pilih Bagian Metode Pembayaran",
                                 },
                             ],
                         },
