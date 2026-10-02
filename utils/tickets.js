@@ -226,7 +226,7 @@ export function ticketPanelPayload() {
     return {
         embeds: [
             {
-                color: 0xce0200,
+                color: 0x393a41,
                 author: {
                     name: "Harmony Hub — Ticket Service",
                     icon_url:
@@ -237,7 +237,7 @@ export function ticketPanelPayload() {
                 fields: [
                     {
                         name: "🏷️ Buy",
-                        value: "Order a development service (bot, tools, etc).",
+                        value: "Order a development service (bot, server, etc).",
                         inline: true,
                     },
                     {
@@ -247,7 +247,7 @@ export function ticketPanelPayload() {
                     },
                 ],
                 image: {
-                    url: "https://i.pinimg.com/1200x/5c/ff/be/5cffbe0205462492b0d7fae908db8929.jpg",
+                    url: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExejJjMWhvODBrMDIxdjg1cHBiMmwxY2gwcnRlN3FxMno5cnlsZTJzbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/D8ZOiwNJ3YLRh4Pa4u/giphy.gif",
                 },
                 footer: {
                     text: "Only 1 active ticket allowed per member",
