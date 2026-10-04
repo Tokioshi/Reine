@@ -2,7 +2,6 @@ import config from "../config.js";
 import { ephemeralEmbed } from "../utils/responses.js";
 import { editOriginalResponse, sendMessage } from "../utils/discord.js";
 import { ComponentType } from "../utils/constants.js";
-import { tosComponentHandlers } from "../components/tos.js";
 
 function execute(interaction) {
     return {
@@ -158,5 +157,4 @@ export default {
         default_member_permissions: "8",
     },
     execute,
-    componentHandlers: tosComponentHandlers,
 };
