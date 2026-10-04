@@ -9,7 +9,7 @@ test("hosting FAQ replies with an ephemeral embed", () => {
     });
 
     assert.equal(response.data.flags, MessageFlags.EPHEMERAL);
-    assert.equal(response.data.embeds[0].title, "1. Hosting dan Infrastruktur");
+    assert.equal(response.data.embeds[0].title, "Hosting dan Infrastruktur");
     assert.match(response.data.embeds[0].description, /Apakah layanan pembuatan Karya Akhir/);
 });
 

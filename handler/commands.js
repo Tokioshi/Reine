@@ -11,6 +11,7 @@ import { faqComponentHandlers } from "../components/faq.js";
 import { paymentMethodComponentHandlers } from "../components/payment-method.js";
 import { priceListComponentHandlers } from "../components/bot-price-list.js";
 import { serverPriceListComponentHandlers } from "../components/server-price-list.js";
+import { tosComponentHandlers } from "../components/tos.js";
 import { registerGuildCommands } from "../utils/discord.js";
 import { json, methodNotAllowed } from "../utils/http.js";
 
@@ -35,6 +36,7 @@ export const componentHandlers = Object.assign(
     faqComponentHandlers,
     paymentMethodComponentHandlers,
     serverPriceListComponentHandlers,
+    tosComponentHandlers,
     ...commands.map((command) => command.componentHandlers ?? {}),
 );
 
