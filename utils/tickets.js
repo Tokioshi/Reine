@@ -499,6 +499,8 @@ async function createTicketFromModal(interaction, env, type) {
                     },
                 ],
             });
+
+            console.log("A new ticket has been created.");
         } catch (responseError) {
             console.error("[ticket] Failed to send creation confirmation:", responseError.message);
         }
